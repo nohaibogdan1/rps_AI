@@ -45,25 +45,59 @@ import pymongo, json, random
 # username
 
 def play_medium_mode():
-    moves = list()
-
-    nr_games = 0
+    beats = {"R": "S", "P": "R", "S": "P"}
+    moves = ["R", "P", "S"]
+    counts = {
+        "R": 0,
+        "S": 0,
+        "P": 0
+    }
+    computer_points = player_points = ties = 0
+    player_moves = list()
 
     while True:
-        nr_games += 1
 
         # calculul strategiei
-        if nr_games < 3:
+        if len(player_moves) < 3:
             # fac random
             computer_move_int = random.randint(0,2)
-
-
-
-
+            computer_move = moves[computer_move_int]
+        else:
+            # aleg din istoric in functie de frecvente
+            if counts["R"] > counts["S"] and counts["R"] > counts["P"]:
+                computer_move = "P"
+            elif counts["P"] > counts["S"]:
+                computer_move = "S"
+            else:
+                computer_move = "R"
 
         # iau inputul
-        player_move = input("choose 'R', 'P', 'S'");
+        player_move = input("choose 'R', 'P', 'S': ");
 
+        if player_move != "R" and player_move != "P" and player_move != "S" and player_move != "quit":
+            continue
+        if player_move == "quit":
+            break
+
+        if computer_move == player_move:
+            ties += 1
+
+        if beats[computer_move] == player_move:
+            computer_points += 1
+
+        if beats[player_move] == computer_move:
+            player_points += 1
+
+        print("computer move: ", computer_move)
+        print("player move: ", player_move)
+        leaderboard = "computer_points %d  player_points: %d, ties: %d" % (computer_points, player_points, ties)
+        print(leaderboard)
+        print("\n--------------------------------------------------\n")
+
+        # adaugam mutarea playerului in istoric
+        if counts.get(player_move) != None:
+            counts[player_move] += 1
+            player_moves.append(player_move)
 
 
 
@@ -162,4 +196,5 @@ def main():
 
 # main()
 
-play_easy_mode()
+#play_easy_mode()
+play_medium_mode()
