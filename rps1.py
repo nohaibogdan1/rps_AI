@@ -16,7 +16,7 @@
 # pentru rock avem 1, pentru paper avem 2, pentru scissors avem 3
 #                 'R'                  'P'                     'S'
 
-import pymongo, json, random
+import pymongo, random
 
 # print(random.randint(0,2))
 
@@ -43,6 +43,95 @@ import pymongo, json, random
 # 3 niveluri: easy, medium, hard
 
 # username
+
+def play_hard_mode(old_player_moves):
+    beats = {"R": "S", "P": "R", "S": "P"}
+    moves = ["R", "P", "S"]
+    winning_strategy_threshold = 5
+    player_moves = list(old_player_moves)
+    strategies_score = {"move_patterns": 10, "rotation": 10}
+    move_patterns = []
+    computer_points = player_points = ties = 0
+    computer_move = ''
+    last_computer_move = ''
+    last_player_move = ''
+    last_player_win = False
+
+    while True:
+        if len(player_moves) < 3 or last_computer_move == '':
+            # print("RANDOM1")
+            computer_move_int = random.randint(0, 2)
+            computer_move = moves[computer_move_int]
+
+        else:
+
+            # choose strategy based on their scores
+            if strategies_score["move_patterns"] < strategies_score["rotation"]:
+                chosen_strategy = "rotation"
+            else:
+                chosen_strategy = "move_patterns"
+
+            if chosen_strategy == "rotation":
+                # rotation strategy
+
+                if last_player_win:
+                    # means there is a better chance that player will do the same move
+                    for key in beats:
+                        if beats[key] == last_player_move:
+                            computer_move = key
+                else:
+                    # means there is a better chance that player will change to a move that beats computer's last move
+                    if last_computer_move == "R":
+                        computer_move = "S"
+                    elif last_computer_move == "P":
+                        computer_move = "R"
+                    else:
+                        computer_move = "P"
+
+            # if chosen_strategy == "move_patterns":
+            #     pattern strategy
+
+            # iau inputul
+            player_move = input("choose 'R', 'P', 'S': ");
+
+            if player_move != "R" and player_move != "P" and player_move != "S" and player_move != "quit":
+                continue
+            if player_move == "quit":
+                break
+
+            if computer_move == player_move:
+                ties += 1
+            elif beats[computer_move] == player_move:
+                computer_points += 1
+                last_player_win = False
+
+                # modify scores for strategies
+                if chosen_strategy == "rotation":
+                    strategies_score["rotation"] += 1
+                    strategies_score["move_patterns"] -= 1
+            else:
+                player_points += 1
+                last_player_win = True
+
+                # modify scores for strategies
+                if chosen_strategy == "rotation":
+                    strategies_score["rotation"] -= 1
+                    strategies_score["move_patterns"] += 1
+
+            last_computer_move = computer_move
+            last_player_move = player_move
+
+
+
+    return player_moves
+
+
+
+
+
+
+
+
 
 
 
@@ -81,16 +170,21 @@ def play_medium_mode(old_player_moves, old_counts):
             computer_move = moves[computer_move_int]
         else:
             # aleg din istoric in functie de frecvente
-            if counts[last_player_move + "R"] == counts[last_player_move + "P"] == counts[last_player_move + "S"]:
-                # print("RANDOM2")
-                computer_move_int = random.randint(0,2)
-                computer_move = moves[computer_move_int]
-            elif counts[last_player_move + "R"] > counts[last_player_move + "P"] and counts[last_player_move + "R"] > counts[last_player_move + "S"]:
-                computer_move = "P"
-            elif counts[last_player_move + "P"] > counts[last_player_move + "S"]:
-                computer_move = "S"
+            if random.random() > 0.5:
+                if counts[last_player_move + "R"] == counts[last_player_move + "P"] == counts[last_player_move + "S"]:
+                    # print("RANDOM2")
+                    computer_move_int = random.randint(0,2)
+                    computer_move = moves[computer_move_int]
+                elif counts[last_player_move + "R"] > counts[last_player_move + "P"] and counts[last_player_move + "R"] > counts[last_player_move + "S"]:
+                    computer_move = "P"
+                elif counts[last_player_move + "P"] > counts[last_player_move + "S"]:
+                    computer_move = "S"
+                else:
+                    computer_move = "R"
             else:
-                computer_move = "R"
+                # print("RANDOM3")
+                computer_move_int = random.randint(0, 2)
+                computer_move = moves[computer_move_int]
 
         # iau inputul
         player_move = input("choose 'R', 'P', 'S': ");
@@ -146,7 +240,7 @@ def play_easy_mode():
         computer_move_int = random.randint(0,2)
         computer_move = moves[computer_move_int]
 
-        print("computer_move", computer_move)
+        # print("computer_move", computer_move)
 
         player_move = input("give your move(R,P,S) or type quit:")
 
