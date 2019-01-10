@@ -48,25 +48,40 @@ def play_medium_mode():
     beats = {"R": "S", "P": "R", "S": "P"}
     moves = ["R", "P", "S"]
     counts = {
-        "R": 0,
-        "S": 0,
-        "P": 0
+        "RR": 0,
+        "RS": 0,
+        "RP": 0,
+        "PR": 0,
+        "PS": 0,
+        "PP": 0,
+        "SR": 0,
+        "SS": 0,
+        "SP": 0,
     }
     computer_points = player_points = ties = 0
     player_moves = list()
+    last_player_move = ''
 
     while True:
+        print("player_moves: ", player_moves)
+        print("counts: ", counts)
+        print("last_player_move: ", last_player_move)
 
         # calculul strategiei
         if len(player_moves) < 3:
             # fac random
+            print("RANDOM1")
             computer_move_int = random.randint(0,2)
             computer_move = moves[computer_move_int]
         else:
             # aleg din istoric in functie de frecvente
-            if counts["R"] > counts["S"] and counts["R"] > counts["P"]:
+            if counts[last_player_move + "R"] == counts[last_player_move + "P"] == counts[last_player_move + "S"]:
+                print("RANDOM2")
+                computer_move_int = random.randint(0,2)
+                computer_move = moves[computer_move_int]
+            elif counts[last_player_move + "R"] > counts[last_player_move + "P"] and counts[last_player_move + "R"] > counts[last_player_move + "S"]:
                 computer_move = "P"
-            elif counts["P"] > counts["S"]:
+            elif counts[last_player_move + "P"] > counts[last_player_move + "S"]:
                 computer_move = "S"
             else:
                 computer_move = "R"
@@ -81,11 +96,9 @@ def play_medium_mode():
 
         if computer_move == player_move:
             ties += 1
-
-        if beats[computer_move] == player_move:
+        elif beats[computer_move] == player_move:
             computer_points += 1
-
-        if beats[player_move] == computer_move:
+        else:
             player_points += 1
 
         print("computer move: ", computer_move)
@@ -95,9 +108,14 @@ def play_medium_mode():
         print("\n--------------------------------------------------\n")
 
         # adaugam mutarea playerului in istoric
-        if counts.get(player_move) != None:
-            counts[player_move] += 1
-            player_moves.append(player_move)
+        player_moves.append(player_move)
+
+        # crestem counts
+        if last_player_move != '':
+            counts[last_player_move + player_move] += 1
+
+        last_player_move = player_move
+
 
 
 
@@ -146,26 +164,18 @@ def play_easy_mode():
         if player_move == "quit":
             break
 
-
         if computer_move == player_move:
             ties += 1
-
-        if beats[computer_move] == player_move:
+        elif beats[computer_move] == player_move:
             computer_points += 1
-
-        if beats[player_move] == computer_move:
+        else:
             player_points += 1
-
 
         print("computer move: ", computer_move)
         print("player move: ", player_move)
         leaderboard = "computer_points %d  player_points: %d, ties: %d" % (computer_points, player_points, ties)
         print(leaderboard)
         print("\n--------------------------------------------------\n")
-
-
-
-
 
 
 
