@@ -44,7 +44,9 @@ import pymongo, json, random
 
 # username
 
-def play_medium_mode():
+
+
+def play_medium_mode(old_player_moves, old_counts):
     beats = {"R": "S", "P": "R", "S": "P"}
     moves = ["R", "P", "S"]
     counts = {
@@ -58,25 +60,29 @@ def play_medium_mode():
         "SS": 0,
         "SP": 0,
     }
+
     computer_points = player_points = ties = 0
-    player_moves = list()
-    last_player_move = ''
+
+    if len(old_counts) == 9:
+        counts = dict(old_counts)
+    player_moves = list(old_player_moves)
+    last_player_move = player_moves[-1]
 
     while True:
-        print("player_moves: ", player_moves)
-        print("counts: ", counts)
-        print("last_player_move: ", last_player_move)
+        # print("player_moves: ", player_moves)
+        # print("counts: ", counts)
+        # print("last_player_move: ", last_player_move)
 
         # calculul strategiei
         if len(player_moves) < 3:
             # fac random
-            print("RANDOM1")
+            # print("RANDOM1")
             computer_move_int = random.randint(0,2)
             computer_move = moves[computer_move_int]
         else:
             # aleg din istoric in functie de frecvente
             if counts[last_player_move + "R"] == counts[last_player_move + "P"] == counts[last_player_move + "S"]:
-                print("RANDOM2")
+                # print("RANDOM2")
                 computer_move_int = random.randint(0,2)
                 computer_move = moves[computer_move_int]
             elif counts[last_player_move + "R"] > counts[last_player_move + "P"] and counts[last_player_move + "R"] > counts[last_player_move + "S"]:
@@ -116,26 +122,11 @@ def play_medium_mode():
 
         last_player_move = player_move
 
-
+    return player_moves, counts
 
 
 # function that configures the game at the begining: dificulty level, username, searches in the file for old games
 #  with the same username
-
-
-def before_game():
-# get the username from player
-
-    # username = input("give me an username")
-    username="cristi"
-    level = input("choose a level: 1->easy, 2->medium, 3->hard")
-
-
-# get the difficulty level
-
-# if level is greater then easy lookup into the database for the username
-
-    return username, level
 
 
 
@@ -179,32 +170,40 @@ def play_easy_mode():
 
 
 
-
-def db_settings():
-    client = pymongo.MongoClient()
-    db = client.test
-    users = db.users
-    print(users)
-    users.insert_one({"username":"Smith"})
-
-    client.close()
-
-
-# db_settings()
-
-
-
-
 def main():
-    username, level = before_game()
+    # username = input("give me an username")
+    username = "cristi"
+    level = input("choose a level: 1->easy, 2->medium, 3->hard")
+
     print(level)
     if level == '1':
         # play in easy mode
         play_easy_mode()
 
+    if level != '1':
+        client = pymongo.MongoClient('localhost', 27017)
+        users = client.test.users
+        data = users.find_one({"username": username}, {"_id": 0, "player_moves": 1, "counts": 1})
+        old_player_moves = []
+        old_counts = {}
+        if data is None:
+            users.insert_one({"username": username, "player_moves": (), "counts": {}})
+        else:
+            old_player_moves = data["player_moves"]
+            old_counts = data["counts"]
+        if level == '2':
+            new_player_moves, new_counts = play_medium_mode(old_player_moves, old_counts)
+
+        # if level == '3':
+            # new_moves = play_hard_mode(moves)
+        # new_player_moves = [10, 10]
+        # new_counts = {'RR': 0}
+        users.update_one({"username": username}, {'$set': {"player_moves": new_player_moves, "counts": new_counts}})
+
+        client.close()
 
 
-# main()
+main()
 
 #play_easy_mode()
-play_medium_mode()
+# play_medium_mode()
