@@ -58,6 +58,7 @@ def play_hard_mode(old_player_moves):
     last_player_win = False
 
     while True:
+        chosen_strategy = "rotation"
         if len(player_moves) < 3 or last_computer_move == '':
             # print("RANDOM1")
             computer_move_int = random.randint(0, 2)
@@ -91,35 +92,39 @@ def play_hard_mode(old_player_moves):
             # if chosen_strategy == "move_patterns":
             #     pattern strategy
 
-            # iau inputul
-            player_move = input("choose 'R', 'P', 'S': ");
+        # iau inputul
+        player_move = input("choose 'R', 'P', 'S': ");
 
-            if player_move != "R" and player_move != "P" and player_move != "S" and player_move != "quit":
-                continue
-            if player_move == "quit":
-                break
+        if player_move != "R" and player_move != "P" and player_move != "S" and player_move != "quit":
+            continue
+        if player_move == "quit":
+            break
 
-            if computer_move == player_move:
-                ties += 1
-            elif beats[computer_move] == player_move:
-                computer_points += 1
-                last_player_win = False
+        if computer_move == player_move:
+            ties += 1
+        elif beats[computer_move] == player_move:
+            computer_points += 1
+            last_player_win = False
 
-                # modify scores for strategies
-                if chosen_strategy == "rotation":
-                    strategies_score["rotation"] += 1
-                    strategies_score["move_patterns"] -= 1
-            else:
-                player_points += 1
-                last_player_win = True
+            # modify scores for strategies
+            if chosen_strategy == "rotation":
+                strategies_score["rotation"] += 1
+                strategies_score["move_patterns"] -= 1
+        else:
+            player_points += 1
+            last_player_win = True
 
-                # modify scores for strategies
-                if chosen_strategy == "rotation":
-                    strategies_score["rotation"] -= 1
-                    strategies_score["move_patterns"] += 1
+            # modify scores for strategies
+            if chosen_strategy == "rotation":
+                strategies_score["rotation"] -= 1
+                strategies_score["move_patterns"] += 1
+        print('computer points:', computer_points)
+        print('player points:', player_points)
+        print('ties:', ties)
+        print('strategies_score:', strategies_score)
 
-            last_computer_move = computer_move
-            last_player_move = player_move
+        last_computer_move = computer_move
+        last_player_move = player_move
 
 
 
@@ -155,6 +160,7 @@ def play_medium_mode(old_player_moves, old_counts):
     if len(old_counts) == 9:
         counts = dict(old_counts)
     player_moves = list(old_player_moves)
+    print('player_moves:', player_moves)
     last_player_move = player_moves[-1]
 
     while True:
@@ -212,6 +218,8 @@ def play_medium_mode(old_player_moves, old_counts):
 
         # crestem counts
         if last_player_move != '':
+            print('last_player_move:', last_player_move)
+            print('player_move:', player_move)
             counts[last_player_move + player_move] += 1
 
         last_player_move = player_move
@@ -288,11 +296,11 @@ def main():
         if level == '2':
             new_player_moves, new_counts = play_medium_mode(old_player_moves, old_counts)
 
-        # if level == '3':
-            # new_moves = play_hard_mode(moves)
+        if level == '3':
+            new_moves = play_hard_mode(old_player_moves)
         # new_player_moves = [10, 10]
         # new_counts = {'RR': 0}
-        users.update_one({"username": username}, {'$set': {"player_moves": new_player_moves, "counts": new_counts}})
+        #users.update_one({"username": username}, {'$set': {"player_moves": new_player_moves, "counts": new_counts}})
 
         client.close()
 
